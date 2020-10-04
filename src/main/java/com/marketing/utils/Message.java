@@ -2,7 +2,7 @@ package com.marketing.utils;
 
 public class Message {
 
-    public final static String msg="Dear %s,\n" +
+    public final static String msg="Hello %s,\n" +
             "\n" +
             "TheTestTribe, Largest Software Testing Community is here with  #TestFlix, one of a kind Global Software Testing Binge. \n" +
             "\n" +

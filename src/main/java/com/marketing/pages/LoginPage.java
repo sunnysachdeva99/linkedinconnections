@@ -81,8 +81,7 @@ public class LoginPage extends BasePage{
         List<String> lstHref= null;
         List<WebElement> list_All = null;
         try {
-            int totalConnections =5;
-                    //getTotalConnections();
+            int totalConnections =getTotalConnections();
             System.out.println("Total Connections :: "+totalConnections);
             lstHref = new ArrayList<>();
             list_All = null;
