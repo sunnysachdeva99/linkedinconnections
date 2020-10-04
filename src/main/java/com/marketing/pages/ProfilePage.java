@@ -93,24 +93,27 @@ public class ProfilePage extends BasePage{
         return matchLevel;
     }
 
-    public void sendMessageToValidProfiles(List<ExcelData> datas, String[] keywords, ExcelWriter writer) throws Exception {
+    public void sendMessageToValidProfiles(List<ExcelData> datas, String[] keywords, ExcelWriter writer,List<String> exclusionList) throws Exception {
         String matchLevel;
         String processed="Done";
         String firstName="";
         for(ExcelData data:datas){
-            navigateToProfilePage(data.getUrl());
-            matchLevel=getMatchLevel(keywords);
-            if(!matchLevel.isEmpty()){
-                try {
-                    firstName = getFullName()[0];
-                    sendMessage(firstName);
-                } catch (Exception e) {
-                    processed="Something went wrong";
-                    e.printStackTrace();
-                }finally {
-                    writer.writeFinalData(data.getId(),firstName,data.getUrl(),matchLevel,processed);
+            if(!exclusionList.contains(data.getUrl())){
+                navigateToProfilePage(data.getUrl());
+                matchLevel=getMatchLevel(keywords);
+                if(!matchLevel.isEmpty()){
+                    try {
+                        firstName = getFullName()[0];
+                        sendMessage(firstName);
+                    } catch (Exception e) {
+                        processed="Something went wrong";
+                        e.printStackTrace();
+                    }finally {
+                        writer.writeFinalData(data.getId(),firstName,data.getUrl(),matchLevel,processed);
+                    }
                 }
             }
+
         }
 
     }

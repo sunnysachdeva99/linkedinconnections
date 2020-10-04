@@ -83,4 +83,22 @@ public class ExcelReader {
     }
 
 
+    public List<String> getExclusionList() throws FilloException {
+        Fillo fillo = new Fillo();
+        String keyword="";
+        List<String> exclusionList = new ArrayList<>();
+        Connection connection = fillo.getConnection(this.wrkBook);
+        String query ="select url from exclusions";
+        Recordset recordset=connection.executeQuery(query);
+        HashMap<String,String> map = new HashMap<>();
+        while(recordset.next()){
+            exclusionList.add(recordset.getField("url"));
+        }
+
+        recordset.close();
+        connection.close();
+        return exclusionList;
+    }
+
+
 }

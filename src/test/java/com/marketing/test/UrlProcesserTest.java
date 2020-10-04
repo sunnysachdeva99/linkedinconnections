@@ -16,8 +16,8 @@ public class UrlProcesserTest extends BaseTest{
         List<ExcelData> data=excelReader.getProcessedRecords();
         String keyword = excelReader.getKeywords();
         String [] keywords = keyword.split("/");
-
-        profilePage.sendMessageToValidProfiles(data,keywords,excelWriter);
+        List<String> exclusionList=excelReader.getExclusionList();
+        profilePage.sendMessageToValidProfiles(data,keywords,excelWriter,exclusionList);
 
 
 
