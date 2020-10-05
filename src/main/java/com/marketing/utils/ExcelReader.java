@@ -33,6 +33,7 @@ public class ExcelReader {
             //System.out.println(recordset.getField("Login")+ " -- "+recordset.getField("Password"));
             map.put("login",recordset.getField("username"));
             map.put("password",recordset.getField("password"));
+            map.put("outputMode",recordset.getField("outputIn"));
         }
 
         recordset.close();

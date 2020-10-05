@@ -8,7 +8,9 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -76,10 +78,10 @@ public class LoginPage extends BasePage{
 
 
 
-    public List<String> getAllHref() throws InterruptedException {
-
+    public Set<String> getAllHref() throws InterruptedException {
         List<String> lstHref= null;
         List<WebElement> list_All = null;
+        Set<String> hSet= new HashSet<String>();
         try {
             int totalConnections =getTotalConnections();
             System.out.println("Total Connections :: "+totalConnections);
@@ -89,13 +91,15 @@ public class LoginPage extends BasePage{
                  list_All = driver.findElements(lst_AllConnections);
                 while(true){
                     driver.scrollToEnd();
-                    //driver.scrollUpByJS(500);
                     driver.waitForPageLoad(30);
-                    Uninterruptibles.sleepUninterruptibly(7, TimeUnit.SECONDS);
+                    Uninterruptibles.sleepUninterruptibly(5, TimeUnit.SECONDS);
                     list_All = driver.findElements(lst_AllConnections);
-                    System.out.println("found "+list_All.size()+ " total connectionls :: "+totalConnections);
+                    hSet=list_All.stream()
+                            .map(e-> driver.getAttribute(e,"href"))
+                            .collect(Collectors.toSet());
+                    System.out.println("found "+list_All.size()+ " total connection is :: "+totalConnections);
                     driver.scrollUpByJS(100);
-                    if(list_All.size() >= totalConnections){
+                    if(totalConnections - list_All.size() <=2){
                         System.out.println("Total count matched !!!!");
                         break;
                     }
@@ -106,14 +110,9 @@ public class LoginPage extends BasePage{
         } catch (Exception e) {
             e.printStackTrace();
         }
-        finally{
-            for(WebElement element: list_All){
-                String href= driver.getAttribute(element,"href");
-                lstHref.add(href);
-            }
-        }
 
-        return lstHref;
+
+        return hSet;
     }
 
 

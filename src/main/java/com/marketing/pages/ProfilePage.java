@@ -2,6 +2,7 @@ package com.marketing.pages;
 
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.marketing.beans.ExcelData;
+import com.marketing.utils.DBUtil;
 import com.marketing.utils.ExcelWriter;
 import com.marketing.utils.LinkedInDriver;
 import com.marketing.utils.Message;
@@ -110,6 +111,33 @@ public class ProfilePage extends BasePage{
                         e.printStackTrace();
                     }finally {
                         writer.writeFinalData(data.getId(),firstName,data.getUrl(),matchLevel,processed);
+                    }
+                }
+            }
+
+        }
+
+    }
+
+
+
+    public void sendMessageToValidProfiles(List<ExcelData> datas, String[] keywords, DBUtil dbUtil, List<String> exclusionList) throws Exception {
+        String matchLevel;
+        String processed="Done";
+        String firstName="";
+        for(ExcelData data:datas){
+            if(!exclusionList.contains(data.getUrl())){
+                navigateToProfilePage(data.getUrl());
+                matchLevel=getMatchLevel(keywords);
+                if(!matchLevel.isEmpty()){
+                    try {
+                        firstName = getFullName()[0];
+                        sendMessage(firstName);
+                    } catch (Exception e) {
+                        processed="Something went wrong";
+                        e.printStackTrace();
+                    }finally {
+                        dbUtil.writeFinalData(firstName,data.getUrl(),matchLevel,processed);
                     }
                 }
             }

@@ -25,11 +25,13 @@ public class LocalDriverFactory {
             if(IsHeadless) {
                 chromeOptions.addArguments("headless");
                 chromeOptions.addArguments("--no-sandbox");
+                chromeOptions.addArguments("enable-automation");
                 chromeOptions.addArguments("window-size=1920,1080");
+                chromeOptions.addArguments("--disable-infobars");
                 chromeOptions.addArguments("--disable-dev-shm-usage");
                 chromeOptions.addArguments("--verbose");
-                chromeOptions.addArguments("--whitelisted-ips=''");
-                chromeOptions.addArguments("--remote-debugging-port=9222");
+                //chromeOptions.addArguments("--whitelisted-ips=''");
+                //chromeOptions.addArguments("--remote-debugging-port=9222");
                 chromeOptions.setPageLoadStrategy(PageLoadStrategy.EAGER);
 
             }
@@ -37,6 +39,7 @@ public class LocalDriverFactory {
             driver.manage().window().maximize();
             driver.manage().timeouts().implicitlyWait(implicitWait, TimeUnit.SECONDS);
             driver.manage().timeouts().pageLoadTimeout(40, TimeUnit.SECONDS);
+            driver.manage().timeouts().setScriptTimeout(90, TimeUnit.SECONDS);
         }else if(browserName.equalsIgnoreCase("firefox")){
             WebDriverManager.firefoxdriver().setup();
             driver = new FirefoxDriver();
