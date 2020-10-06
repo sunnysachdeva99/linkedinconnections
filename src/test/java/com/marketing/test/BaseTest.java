@@ -37,6 +37,7 @@ public class BaseTest {
         dbUtil   = new DBUtil();
         HashMap<String,String> map= excelReader.getCredentials();
         outputMode=map.get("outputMode");
+        outputMode=outputMode.toUpperCase();
         loginPage= new LoginPage(driver);
         loginPage.loginAs(map.get("login"),map.get("password"));
         profilePage= new ProfilePage(driver);

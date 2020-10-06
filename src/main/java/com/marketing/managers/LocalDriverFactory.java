@@ -38,7 +38,7 @@ public class LocalDriverFactory {
             driver = new ChromeDriver(chromeOptions);
             driver.manage().window().maximize();
             driver.manage().timeouts().implicitlyWait(implicitWait, TimeUnit.SECONDS);
-            driver.manage().timeouts().pageLoadTimeout(40, TimeUnit.SECONDS);
+            driver.manage().timeouts().pageLoadTimeout(10, TimeUnit.SECONDS);
             driver.manage().timeouts().setScriptTimeout(90, TimeUnit.SECONDS);
         }else if(browserName.equalsIgnoreCase("firefox")){
             WebDriverManager.firefoxdriver().setup();

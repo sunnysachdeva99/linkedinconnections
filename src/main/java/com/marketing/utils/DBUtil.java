@@ -77,10 +77,15 @@ public class DBUtil {
             LocalDate localDate = LocalDate.now();
             //conn = DriverManager.getConnection(DB_URL);
             for(String url: hSet){
-                int insertedRecords = queryRunner.update(this.conn,
-                        "INSERT INTO raw(url,date) VALUES (?,?)", url,localDate);
-                Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
-                System.out.println(count.incrementAndGet()+ "  "+url);
+                try{
+                    int insertedRecords = queryRunner.update(this.conn,
+                            "INSERT INTO raw(url,date) VALUES (?,?)", url,localDate);
+                    Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
+                    System.out.println(count.incrementAndGet()+ "  "+url);
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+
             }
 
         } catch (Exception e) {

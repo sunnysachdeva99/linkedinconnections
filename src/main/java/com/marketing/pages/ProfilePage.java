@@ -49,6 +49,7 @@ public class ProfilePage extends BasePage{
         }else if(driver.IsLocatorVisible(By.xpath(lbl_About) )){
                 _scrollTillAbout();
                 String xpath=lbl_About+"/following-sibling::p//a[text()='see more']";
+                Uninterruptibles.sleepUninterruptibly(1,TimeUnit.SECONDS);
                 //can be improved
                 driver.clickIfPresent(By.xpath(xpath));
                 expUnderAbout=driver.getText(By.xpath(lbl_About+"/following-sibling::p")).toLowerCase();
@@ -62,31 +63,32 @@ public class ProfilePage extends BasePage{
             matchLevel=matchLevel+"Latest Exp | ";
         }
         else {
-            _scrollTillSkills();
-            driver.clickLocator(lnk_Skills_ShowMore);
-            List<WebElement> lstSkills=driver.findElements(lst_Skills);
-            List<String> skills=lstSkills.stream()
-                    .map(WebElement::getText)
-                    .collect(Collectors.toList());
-            String [] arrSkills =skills.toArray(new String[skills.size()]);
+            if(_scrollTillSkills()){
+                driver.clickLocator(lnk_Skills_ShowMore);
+                List<WebElement> lstSkills=driver.findElements(lst_Skills);
+                List<String> skills=lstSkills.stream()
+                        .map(WebElement::getText)
+                        .collect(Collectors.toList());
+                String [] arrSkills =skills.toArray(new String[skills.size()]);
 
-            outer:
-            for(String skill:skills){
-                for(String keyword : variations){
-                    System.out.println(skill+" === "+keyword);
-                    if(skill.toLowerCase().contains(keyword.toLowerCase())){
-                        matchLevel=matchLevel+" Skills |";
-                        break outer;
+                outer:
+                for(String skill:skills){
+                    for(String keyword : variations){
+                        System.out.println(skill+" === "+keyword);
+                        if(skill.toLowerCase().contains(keyword.toLowerCase())){
+                            matchLevel=matchLevel+" Skills |";
+                            break outer;
+                        }
+
                     }
-
                 }
             }
 
         }
 
-        if(matchLevel.equalsIgnoreCase("")){
-            matchLevel="Weak match !!!";
-        }
+//        if(matchLevel.equalsIgnoreCase("")){
+//            matchLevel="Weak match !!!";
+//        }
 
         if(!matchLevel.isEmpty()){
             IsMatched=true;
@@ -147,39 +149,54 @@ public class ProfilePage extends BasePage{
     }
 
     private void _scrollTillExperience(){
+        int counter =0;
         driver.scrollDownByJS(500);
         while(true){
+            counter++;
             if(driver.IsLocatorPresent(lbl_Exp)){
                 break;
             }else{
                 driver.scrollDownByJS(500);
             }
-
+            if(counter==3){
+                break;
+            }
         }
     }
 
     private void _scrollTillAbout(){
-        driver.scrollDownByJS(500);
+        int counter =0;
+        driver.scrollDownByJS(300);
         while(true){
+            counter++;
             if(driver.IsLocatorPresent(By.xpath(lbl_About))){
                 break;
             }else{
                 driver.scrollDownByJS(500);
             }
-
+            if(counter==3){
+                break;
+            }
         }
     }
 
-    private void _scrollTillSkills(){
+    private boolean _scrollTillSkills(){
+        boolean IsPresent=false;
+        int counter =1;
         driver.scrollDownByJS(500);
         while(true){
+            counter++;
             if(driver.IsLocatorPresent(lbl_SKills)){
+                IsPresent=true;
                 break;
             }else{
                 driver.scrollDownByJS(500);
             }
-
+            if(counter==2){
+                break;
+            }
         }
+        return  IsPresent;
     }
 
     private boolean matchFound(String text, String[] list){
@@ -201,17 +218,21 @@ public class ProfilePage extends BasePage{
         Uninterruptibles.sleepUninterruptibly(2,TimeUnit.SECONDS);
         driver.waitForLocatorToBeClickable(lnk_Message);
         driver.clickLocator(lnk_Message);
-        Uninterruptibles.sleepUninterruptibly(2,TimeUnit.SECONDS);
-        System.out.println(driver.getAttribute(btn_Send,"disabled"));
+        Uninterruptibles.sleepUninterruptibly(3,TimeUnit.SECONDS);
+        //System.out.println(driver.getAttribute(btn_Send,"disabled"));
         String msg = Message.msg;
         msg=String.format(msg,name);
         System.out.println(msg);
-        driver.sendKeysLocatorByJS(txt_Message,msg);
+       // driver.clickLocatorByJS(txt_Message);
+        Uninterruptibles.sleepUninterruptibly(1,TimeUnit.SECONDS);
+        //driver.sendKeysLocatorByJS(txt_Message,msg);
         driver.sendKeys(txt_Message,msg);
-        Uninterruptibles.sleepUninterruptibly(3, TimeUnit.SECONDS);
-        //System.out.println(driver.getAttribute(btn_Send,"disabled"));
-        driver.clickLocatorByJS(btn_Send);
         Uninterruptibles.sleepUninterruptibly(2, TimeUnit.SECONDS);
+        if(IsSendButtonEnabled()){
+            driver.clickLocatorByJS(btn_Send);
+        }
+        Uninterruptibles.sleepUninterruptibly(2, TimeUnit.SECONDS);
+
         System.out.println("Done");
     }
 
@@ -223,19 +244,23 @@ public class ProfilePage extends BasePage{
         return names;
     }
 
-    private void clickSendMessage() {
+    private boolean IsSendButtonEnabled() {
+        boolean IsEnabled=false;
         int counter=1;
-        while (counter <=2){
+        while (counter <=10){
             try{
-                driver.clickLocator(btn_Send);
-                System.out.println(driver.getAttribute(btn_Send,"disabled"));
+               String status= driver.getAttribute(btn_Send,"disabled");
+               if(!status.equalsIgnoreCase("True")){
+                   Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
+               }
             }catch (Exception e){
-
+                IsEnabled=true;
+                break;
             }finally {
                 counter++;
             }
         }
-
+        return IsEnabled;
     }
 
 }
