@@ -6,9 +6,12 @@ import com.marketing.utils.DBUtil;
 import com.marketing.utils.ExcelWriter;
 import com.marketing.utils.LinkedInDriver;
 import com.marketing.utils.Message;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
+import sun.tools.java.Environment;
 
 import java.util.Arrays;
 import java.util.List;
@@ -16,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class ProfilePage extends BasePage{
-
+    Logger logger= LogManager.getLogger(ProfilePage.class);
     public ProfilePage(LinkedInDriver driver) {
         super(driver);
     }
@@ -30,7 +33,7 @@ public class ProfilePage extends BasePage{
     private By lst_Skills=By.xpath("//span[@Class='pv-skill-category-entity__name-text t-16 t-black t-bold']");
     private By lbl_SKills=By.xpath("//h2[text()='Skills & Endorsements']");
     private By lnk_Skills_ShowMore=By.xpath("//h2[text()='Skills & Endorsements']/parent::div[@class='display-flex']/parent::div/following-sibling::div[@class='ember-view']//span[text()='Show more']");
-
+    private By btn_Close_Msg = By.xpath("//button[contains(@data-control-name,'close')]");
 
     private String getMatchLevel(String[] variations) throws Exception {
         boolean IsMatched=false;
@@ -139,11 +142,38 @@ public class ProfilePage extends BasePage{
                         processed="Something went wrong";
                         e.printStackTrace();
                     }finally {
-                        dbUtil.writeFinalData(firstName,data.getUrl(),matchLevel,processed);
+                        dbUtil.writeFinalData(data.getId(),firstName,matchLevel,processed);
                     }
                 }
             }
 
+        }
+
+    }
+
+
+    public void sendMessageToValidProfiles(List<ExcelData> datas, String[] keywords, DBUtil dbUtil, List<String> exclusionList, int maxLimit) throws Exception {
+        String matchLevel;
+        String processed="Done";
+        String firstName="";
+        int counter=1;
+        for(ExcelData data:datas){
+            if(!exclusionList.contains(data.getUrl()) && counter<=maxLimit){
+                navigateToProfilePage(data.getUrl());
+                matchLevel=getMatchLevel(keywords);
+                if(!matchLevel.isEmpty()){
+                    try {
+                        firstName = getFullName()[0];
+                        sendMessage(firstName);
+                    } catch (Exception e) {
+                        processed="Something went wrong";
+                        e.printStackTrace();
+                    }finally {
+                        dbUtil.writeFinalData(data.getId(),firstName,matchLevel,processed);
+                    }
+                }
+            }
+            counter++;
         }
 
     }
@@ -213,6 +243,9 @@ public class ProfilePage extends BasePage{
         return IsFound;
     }
 
+
+
+
     private void sendMessage(String name) throws Exception {
         driver.moveToLocator(lnk_Message);
         Uninterruptibles.sleepUninterruptibly(2,TimeUnit.SECONDS);
@@ -229,10 +262,11 @@ public class ProfilePage extends BasePage{
         driver.sendKeys(txt_Message,msg);
         Uninterruptibles.sleepUninterruptibly(2, TimeUnit.SECONDS);
         if(IsSendButtonEnabled()){
+            System.out.println("Send button enabled");
             driver.clickLocatorByJS(btn_Send);
         }
         Uninterruptibles.sleepUninterruptibly(2, TimeUnit.SECONDS);
-
+        driver.clickLocatorByJS(btn_Close_Msg);
         System.out.println("Done");
     }
 
@@ -250,12 +284,16 @@ public class ProfilePage extends BasePage{
         while (counter <=10){
             try{
                String status= driver.getAttribute(btn_Send,"disabled");
-               if(!status.equalsIgnoreCase("True")){
+                System.out.println("Send Button disabled attribute : "+status);
+               if(status.isEmpty()){
+                   IsEnabled=true;
+                   break;
+               }else{
                    Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
                }
             }catch (Exception e){
                 IsEnabled=true;
-                break;
+
             }finally {
                 counter++;
             }

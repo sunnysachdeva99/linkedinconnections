@@ -25,7 +25,7 @@ public class BaseTest {
     private String inputXlPath=System.getProperty("user.dir")+"/src/main/resources/Input.xlsx";
     protected LoginPage loginPage;
     protected ProfilePage profilePage;
-    protected String outputMode="";
+
     @BeforeSuite
     public void setUp() throws Exception {
         webDriver= LocalDriverFactory.createInstance("chrome",false,30);
@@ -36,8 +36,7 @@ public class BaseTest {
         excelReader = new ExcelReader(inputXlPath);
         dbUtil   = new DBUtil();
         HashMap<String,String> map= excelReader.getCredentials();
-        outputMode=map.get("outputMode");
-        outputMode=outputMode.toUpperCase();
+
         loginPage= new LoginPage(driver);
         loginPage.loginAs(map.get("login"),map.get("password"));
         profilePage= new ProfilePage(driver);
@@ -48,6 +47,7 @@ public class BaseTest {
     public void tearDown() throws Exception {
         loginPage.logout();
         driver.quitBrowser();
+
     }
 
 }

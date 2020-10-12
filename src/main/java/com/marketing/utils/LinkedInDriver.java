@@ -617,6 +617,7 @@ public class LinkedInDriver {
 	public String getAttribute(By by,String attribute) throws Exception{
 		String value="";
 		value=this.findElement(by).getAttribute(attribute);
+		value=Optional.ofNullable(value).isPresent()?value:"";
 		logger.info("Getting Attribute :: "+attribute+" from locator :: "+by.toString(),true);
 		return value;
 	}

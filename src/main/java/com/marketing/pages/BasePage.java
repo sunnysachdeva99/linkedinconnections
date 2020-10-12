@@ -2,7 +2,10 @@ package com.marketing.pages;
 
 
 import com.google.common.util.concurrent.Uninterruptibles;
+import com.marketing.utils.DBUtil;
 import com.marketing.utils.LinkedInDriver;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.By;
 
 import java.util.concurrent.TimeUnit;
@@ -10,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 public class BasePage {
 
     protected LinkedInDriver driver;
-
+    Logger logger= LogManager.getLogger(BasePage.class);
     public BasePage(LinkedInDriver driver){
         this.driver=driver;
     }
@@ -23,6 +26,7 @@ public class BasePage {
     private By lnk_SignOut=By.linkText("Sign Out");
 
     public ProfilePage navigateToProfilePage(String url){
+        logger.info("navigating to :: "+url);
         driver.navigateTo(url);
         driver.waitForPageLoad(30);
         return new ProfilePage(driver);
@@ -42,6 +46,8 @@ public class BasePage {
 //        driver.clickLocator(lnk_End_All_Sessions);
 //        driver.pauseForRandomDurationBetween(1,3);
     }
+
+
 
 
 

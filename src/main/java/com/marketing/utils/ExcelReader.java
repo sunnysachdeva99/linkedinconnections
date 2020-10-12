@@ -5,6 +5,9 @@ import com.codoid.products.fillo.Connection;
 import com.codoid.products.fillo.Fillo;
 import com.codoid.products.fillo.Recordset;
 import com.marketing.beans.ExcelData;
+import com.marketing.pages.ProfilePage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,7 +17,7 @@ import java.util.List;
 public class ExcelReader {
 
     private String wrkBook;
-
+    Logger logger= LogManager.getLogger(ExcelReader.class);
     public void createConnection(String wrkBook){
         this.wrkBook=wrkBook;
     }
@@ -27,15 +30,15 @@ public class ExcelReader {
         Fillo fillo = new Fillo();
         Connection connection = fillo.getConnection(this.wrkBook);
         String query ="select * from login where id=1";
+        logger.info("Query to be executed :: "+query);
         Recordset recordset=connection.executeQuery(query);
         HashMap<String,String> map = new HashMap<>();
         while(recordset.next()){
             //System.out.println(recordset.getField("Login")+ " -- "+recordset.getField("Password"));
             map.put("login",recordset.getField("username"));
             map.put("password",recordset.getField("password"));
-            map.put("outputMode",recordset.getField("outputIn"));
         }
-
+        logger.info("Result set :: "+map.toString());
         recordset.close();
         connection.close();
         return map;
@@ -53,7 +56,7 @@ public class ExcelReader {
             lst = new ArrayList<>();
             while (recordset.next()) {
                 data=new ExcelData();
-                data.setId(recordset.getField("id"));
+                data.setId(Integer.parseInt(recordset.getField("id")));
                 data.setUrl(recordset.getField("url"));
                 lst.add(data);
             }

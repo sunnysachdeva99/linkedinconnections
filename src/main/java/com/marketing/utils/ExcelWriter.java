@@ -29,7 +29,7 @@ public class ExcelWriter {
     }
 
 
-    public void writeFinalData(String id,String name,String url,String matchLevel,String processed) throws FilloException {
+    public void writeFinalData(int id,String name,String url,String matchLevel,String processed) throws FilloException {
         Fillo fillo = new Fillo();
         Connection connection = fillo.getConnection(this.wrkBook);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd");

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Properties>
+        <Property name="log-path">test-output/ApplicationLogs</Property>
+    </Properties>
+    <Appenders>
+        <Console name="console-log" target="SYSTEM_OUT">
+            <PatternLayout pattern="[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n"/>
+        </Console>
+        <RollingFile name="trace-log" fileName="${log-path}/sephora-info.log"
+                     filePattern="${log-path}/sephora-trace-%d{yyyy-MM-dd}.log" append="false">
+            <PatternLayout>
+                <pattern>[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+        </RollingFile>
+        <RollingFile name="debug-log" fileName="${log-path}/sephora-debug.log"
+                     filePattern="${log-path}/sephora-debug-%d{yyyy-MM-dd}.log" append="false">
+            <PatternLayout>
+                <pattern>[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+        </RollingFile>
+        <ReportPortalLog4j2Appender name="ReportPortalAppender">
+			<PatternLayout>
+				<pattern>[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n
+				</pattern>
+			</PatternLayout>
+		</ReportPortalLog4j2Appender>
+    </Appenders>
+    
+    <Loggers>
+        <Logger name="com.sephora" level="debug" additivity="false">
+            <appender-ref ref="trace-log" level="info"/>
+            <appender-ref ref="debug-log" level="debug"/>
+            <appender-ref ref="console-log" level="info"/>
+            <appender-ref ref="ReportPortalAppender" />
+        </Logger>
+        <Root level="all">
+            <AppenderRef ref="console-log"/>
+        </Root>
+    </Loggers>
+</Configuration>

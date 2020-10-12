@@ -10,6 +10,8 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.ArrayListHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.sqlite.SQLiteConnection;
 import org.sqlite.SQLiteOpenMode;
 
@@ -29,8 +31,8 @@ public class DBUtil {
     private static Connection conn;
     private static final String JDBC_DRIVER ="org.sqlite.JDBC";
     private static final String DB_URL="jdbc:sqlite:src/main/resources/MyConnections.db";
-
-    public static Connection createConnection(){
+    Logger logger= LogManager.getLogger(DBUtil.class);
+    public  Connection createConnection(){
         try {
             if(conn ==null){
                 DbUtils.loadDriver(JDBC_DRIVER);
@@ -42,11 +44,11 @@ public class DBUtil {
         return conn;
     }
 
-    public void writeRawData(int id, String url) throws SQLException {
+    public void writeRawData(String url) throws SQLException {
         //Connection conn = null;
         QueryRunner queryRunner;
         try {
-            if(this.conn ==null){
+            if(this.conn.isClosed()){
                 this.conn =createConnection();
             }
             queryRunner = new QueryRunner();
@@ -55,11 +57,13 @@ public class DBUtil {
             LocalDate localDate = LocalDate.now();
             //conn = DriverManager.getConnection(DB_URL);
             int insertedRecords = queryRunner.update(this.conn,
-                    "INSERT INTO raw(id,url,date) VALUES (?,?,?)", id,url,localDate);
+                    "INSERT INTO raw(url,date) VALUES (?,?)", url,localDate);
+            System.out.println(conn.isClosed());
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            DbUtils.close(this.conn);
+            //DbUtils.close(this.conn);
+            //conn.close();
 
         }
 
@@ -97,7 +101,40 @@ public class DBUtil {
 
     }
 
-    public List<ExcelData> getRawData() throws SQLException {
+
+    public void writeRawData(List<String> hList) throws SQLException {
+        //Connection conn = null;
+        AtomicInteger count=new AtomicInteger(0);
+        QueryRunner queryRunner;
+        try {
+            createConnection();
+            queryRunner = new QueryRunner();
+            // DbUtils.loadDriver(JDBC_DRIVER);
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+            LocalDate localDate = LocalDate.now();
+            //conn = DriverManager.getConnection(DB_URL);
+            for(String url: hList){
+                try{
+                    int insertedRecords = queryRunner.update(this.conn,
+                            "INSERT INTO raw(url,date) VALUES (?,?)", url,localDate);
+                    Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
+                    System.out.println(count.incrementAndGet()+ "  "+url);
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            DbUtils.close(this.conn);
+            System.out.println(conn.isClosed());
+        }
+
+    }
+
+    public List<ExcelData> getRawData(int maxLimit) throws SQLException {
         Connection conn = null;
         QueryRunner queryRunner;
         List<ExcelData> results=null;
@@ -106,7 +143,8 @@ public class DBUtil {
             queryRunner = new QueryRunner();
             DbUtils.loadDriver(JDBC_DRIVER);
             conn = DriverManager.getConnection(DB_URL);
-            String sql ="SELECT ROWID,url FROM Raw";
+            String sql ="SELECT id,url FROM Raw where processed=0 limit "+maxLimit;
+            logger.info("query to be executed :: "+sql);
             ResultSetHandler<List<ExcelData>> resultHandler = new BeanListHandler<ExcelData>(ExcelData.class);
             results = queryRunner.query(conn, sql, resultHandler);
             if(results == null){
@@ -122,7 +160,7 @@ public class DBUtil {
     }
 
 
-    public void writeFinalData(String name,String url,String matchLevel,String processed) throws FilloException, SQLException {
+    public void writeFinalData(int rowid,String name,String matchLevel,String processed) throws FilloException, SQLException {
         Connection conn = null;
         QueryRunner queryRunner;
         try {
@@ -131,8 +169,11 @@ public class DBUtil {
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd");
             LocalDate localDate = LocalDate.now();
             conn = DriverManager.getConnection(DB_URL);
-            int insertedRecords = queryRunner.update(conn,
-                    "INSERT INTO final(name,url,matchLevel,processed,date) VALUES (?,?,?,?,?)", name,url,matchLevel,processed,localDate);
+//            int insertedRecords = queryRunner.update(conn,
+//                    "INSERT INTO raw(name,profileType,processed,date) VALUES (?,?,?,?) where rowid ="+rowid, name,matchLevel,processed,localDate);
+            String sql =" UPDATE Raw SET processed=?, name=?,profileType=? where rowid=?";
+            int updates = queryRunner.update(conn,sql,processed,name,matchLevel,rowid);
+            System.out.println(updates);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

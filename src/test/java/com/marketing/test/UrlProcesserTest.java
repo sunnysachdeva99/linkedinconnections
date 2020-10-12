@@ -13,19 +13,15 @@ public class UrlProcesserTest extends BaseTest{
 
     @Test
     public void sendMessage() throws Exception {
-        if(outputMode.equalsIgnoreCase("EXCEL")){
-            data=excelReader.getProcessedRecords();
-        }else if(outputMode.equalsIgnoreCase("DB")){
-            data=dbUtil.getRawData();
-        }
+       // profilePage.sendM();
+        int maxLimit=20;
+        data=dbUtil.getRawData(maxLimit);
         String keyword = excelReader.getKeywords();
         String [] keywords = keyword.split("/");
         List<String> exclusionList=excelReader.getExclusionList();
-        if(outputMode.equalsIgnoreCase("EXCEL")){
-            profilePage.sendMessageToValidProfiles(data,keywords,excelWriter,exclusionList);
-        }else if(outputMode.equalsIgnoreCase("DB")){
-            profilePage.sendMessageToValidProfiles(data,keywords,dbUtil,exclusionList);
-        }
+
+        profilePage.sendMessageToValidProfiles(data,keywords,dbUtil,exclusionList);
+
 
 
 

@@ -30,8 +30,12 @@ public class LocalDriverFactory {
                 chromeOptions.addArguments("--disable-infobars");
                 chromeOptions.addArguments("--disable-dev-shm-usage");
                 chromeOptions.addArguments("--verbose");
+                chromeOptions.addArguments("--disable-browser-side-navigation"); //https://stackoverflow.com/a/49123152/1689770
                 //chromeOptions.addArguments("--whitelisted-ips=''");
                 //chromeOptions.addArguments("--remote-debugging-port=9222");
+                chromeOptions.addArguments("--disable-gpu");
+                chromeOptions.addArguments("enable-features=NetworkServiceInProcess");
+
                 chromeOptions.setPageLoadStrategy(PageLoadStrategy.EAGER);
 
             }
